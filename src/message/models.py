@@ -10,7 +10,7 @@ class Message(models.Model):
     email = models.EmailField(max_length=255, null=False, blank=True)
     home_page = models.URLField(max_length=555, null=True)
     text = models.TextField(null=False, default="")
-
+    created_at = models.DateTimeField(auto_now_add=True)
     class Meta:
         ordering = ('user',)
 

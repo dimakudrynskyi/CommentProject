@@ -71,7 +71,6 @@ class MessageDataView(generic.View):
         except:
             comments = Message.objects.filter(chat_id = kwargs['id'])
         context = {
-            "chat_id": kwargs['id'],
             "commnt_list": comments
         }
 
