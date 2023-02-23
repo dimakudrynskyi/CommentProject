@@ -2,7 +2,12 @@
 
 <div>
     {% for comment in commnt_list %}
-        <p>{{ comment.text }}</p>
+        <div>
+            {{ comment.user }}
+            <p style="font-size: 12px;">{{ comment.created_at }}</p>
+            <p>{{ comment.text }}</p>
+        </div>
+    
         <hr>
     {% endfor %}
 </div>

@@ -17,3 +17,10 @@ class ChatListView(generic.ListView):
         # Call the base implementation first to get the context
         context = super(ChatListView, self).get_context_data(**kwargs)
         return context
+
+class ChatListView(generic.View):
+  
+    def get(self, **kwargs):
+       
+        
+        return context

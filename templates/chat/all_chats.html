@@ -1,25 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>Chat List</h1>
+{% extends 'base.html' %}
+{% block content %}
+<div>
+    <h1>All chat</h1>
     {% if chat_list %}
         <ul>
             {% for chat in chat_list %}
             <li>
-                <a href="#">{{ chat.id }}</a> ({{chat.name}})
+                <a href="{% url 'messages:message_by_chat_id' chat.id %}">Chat id - {{ chat.id }}</a> Chat name - ({{chat.name}})
             </li>
             {% endfor %}
         </ul>
     {% else %}
-        <p>There are no books in the library.</p>
+        <p>There are no chat in the database.</p>
     {% endif %}
 
+    <a href="#">Create new chat</a>
+
     
-</body>
-</html>
+</div>
+{% endblock content %}

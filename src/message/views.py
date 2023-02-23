@@ -4,70 +4,61 @@ from django.views import generic
 from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 from django.template import loader
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from .models import Message
 from src.chat.models import Chat
-from .forms import MessageForm
+from .forms import MessageForm, CapatchaForm
 # Create your views here.
 
 
 
 class MessageListView(generic.View):
-    form_class = MessageForm
+    form_class = CapatchaForm
     def get(self, request, *args, **kwargs):
-        context = {'chat_id': kwargs['id']}
+        context = {
+            'chat_id': kwargs['id'], 
+            'captcha_form': self.form_class
+            }
         return render(request, "specific_chat/chat_by_id.html", context)
 
     def post(self, request, *args, **kwargs):
         print(request.POST)
         print("KWARGS ---", kwargs)
         if request.method == "POST":
-            user=request.POST.get('user_name')
-            email=request.POST.get('email')
-            home_page=request.POST.get('home_page')
-            text=request.POST.get('comment')
-            chat_instance = Chat.objects.get(id=kwargs['id'])
-            if not home_page:
-                Message.objects.create(chat_id=chat_instance, user=user, email=email, text=text)
-            elif home_page:
-                Message.objects.create(chat_id=chat_instance, user=user, email=email, home_page=home_page, text=text)
+            form = CapatchaForm(request.POST)
+            if form.is_valid():
+                user=request.POST.get('user_name')
+                email=request.POST.get('email')
+                home_page=request.POST.get('home_page')
+                text=request.POST.get('comment')
+                chat_instance = Chat.objects.get(id=kwargs['id'])
+                if not home_page:
+                    Message.objects.create(chat_id=chat_instance, user=user, email=email, text=text)
+                elif home_page:
+                    Message.objects.create(chat_id=chat_instance, user=user, email=email, home_page=home_page, text=text)
+                else:
+                    print('some problem')
+                return JsonResponse({'message': 'success'})
             else:
-                print('some problem')
-            return JsonResponse({'message': 'success'})
+                return JsonResponse({'message': 'problem with captcha'})
         return JsonResponse({'message': 'Wrong request'})
 
-
-# def messages_by_chat_id(request, id):
-#     template = loader.get_template("specific_chat/message.html")
-#     comments = Message.objects.filter(chat_id = id)
-#     # paginator = Paginator(comments, 2) # Show 25 contacts per page.
-#     page_num = request.GET.get('page', 1)
-#     paginator = Paginator(comments, 2) # 6 employees per page
-#     page_obj = paginator.get_page(page_num)
-#     try:
-#         page_obj = paginator.page(page_num)
-#     except PageNotAnInteger:
-#         # if page is not an integer, deliver the first page
-#         page_obj = paginator.page(1)
-#     except EmptyPage:
-#         # if the page is out of range, deliver the last page
-#         page_obj = paginator.page(paginator.num_pages)
-#     context = {
-#         "page_obj": page_obj
-#     }
-#     # return render(request, "specific_chat/message.html", {'page_obj': page_obj})
-#     return HttpResponse(template.render(context, request))
 class MessageDataView(generic.View):
     def get(self, request, *args, **kwargs):
         template = loader.get_template("specific_chat/message.html")
         try:
-            if kwargs['sort'] == 'text':
-                comments = Message.objects.filter(chat_id = kwargs['id']).order_by('text')
+            if kwargs['sort'] == 'created_at':
+                sort_by = "created_at"
+
             elif kwargs['sort'] == 'name':
-                comments = Message.objects.filter(chat_id = kwargs['id']).order_by('name')
-         
-                
+                sort_by = "user"
+
+            elif kwargs['sort'] == 'created_at_up':
+                sort_by = "-created_at"
+
+            elif kwargs['sort'] == 'name_up':
+                sort_by = "-user"
+            comments = self.get_coments(kwargs['id'], sort_by)
         except:
             comments = Message.objects.filter(chat_id = kwargs['id'])
         context = {
@@ -75,4 +66,20 @@ class MessageDataView(generic.View):
         }
 
         return HttpResponse(template.render(context, self.request))
+
+    @staticmethod
+    def get_coments(chat_id, sort_by):
+        """
+            Function to get sorted comments by chat id.
+            Use raw here to prevent SQL Injection.
+        """
+        if sort_by == "-created_at":
+            raw = 'SELECT * FROM message_message WHERE chat_id_id = {0} ORDER BY "{1}" DESC'.format(chat_id, "created_at")
+        elif sort_by == "-user":
+            raw = 'SELECT * FROM message_message WHERE chat_id_id = {0} ORDER BY "{1}" DESC'.format(chat_id, "user")
+        else:
+            raw = 'SELECT * FROM message_message WHERE chat_id_id = {0} ORDER BY "{1}"'.format(chat_id, sort_by)
+        comments = Message.objects.raw(raw)
+
+        return comments
 
