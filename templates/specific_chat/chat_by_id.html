@@ -11,16 +11,19 @@
 {% block content %}
 <div class="container">
     <div class="row pt-5">
+       
         <div class="col-6 offset-3">
-            
+           
             <form id="formComment" action="{% url 'messages:message_by_chat_id' chat_id %}" autocomplete="off">
                 {% csrf_token %}
                 <div class="row">
                     <div class="col-12">
                         <div class="form-group validate">
                             <label for="comment">Comment</label>
-                            <textarea rows="5" name="user" class="form-control" placeholder="Enter your name"></textarea>
-                            <textarea rows="5" name="comment" class="form-control" placeholder="Enter your comment"></textarea>
+                            <input rows="5" name="user_name" class="form-control" placeholder="Enter your name" required>
+                            <input rows="5" type="email" name="email" class="form-control" placeholder="Enter your email" required>
+                            <input rows="5" type="url" name="home_page" class="form-control" placeholder="Enter your home page">
+                            <textarea rows="5" id="comment" name="comment" class="form-control" placeholder="Enter your comment required"></textarea>
                             <small class="text-red text-muted mySpan"></small>
                         </div>
                     <div class="col-6">
@@ -28,12 +31,13 @@
                     </div>
                 </div>
             </form>
-
+            <button onclick="sortCommentsByText('{{ chat_id }}', 'text')">By text</button>
+            <button onclick="sortCommentsByText('{{ chat_id }}', 'name')">By name</button>
             <div class="comment-content mt-5" data-url="{% url 'messages:comment_data' chat_id%}">
-
             </div>
         </div>
     </div>
+
 </div>
 {% endblock content %}
 
@@ -52,6 +56,19 @@
             }
         });
     }
+    function sortCommentsByText(chat_id, sort_by){
+        $.ajax({
+            url: 'view/'+chat_id+'/'+sort_by,
+            type: "GET",
+            success: function(resp){
+                $(".comment-content").html(resp);
+            },
+            error: function(resp){
+                console.log("something went wrong");
+            }
+        });
+    }
+
     getComments();
 
     $("#formComment").on("submit", function(e){
@@ -80,6 +97,7 @@
                 success: function(resp){
                     if(resp.message === 'success'){
                         getComments();
+                        document.getElementById("comment").value = "";
                     }else{
                         alert(resp.message);
                     }

@@ -7,6 +7,8 @@ from src.chat.models import Chat
 class Message(models.Model):
     chat_id = models.ForeignKey(Chat, on_delete=models.DO_NOTHING, related_name="chat_id", null=True)
     user = models.CharField(max_length=255, null=False, default="")
+    email = models.EmailField(max_length=255, null=False, blank=True)
+    home_page = models.URLField(max_length=555, null=True)
     text = models.TextField(null=False, default="")
 
     class Meta:
