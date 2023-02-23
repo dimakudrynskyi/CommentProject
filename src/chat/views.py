@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.views import generic
-
+from django.urls import reverse
+from django.shortcuts import redirect
 from .models import Chat
 
 # Create your views here.
@@ -18,9 +19,12 @@ class ChatListView(generic.ListView):
         context = super(ChatListView, self).get_context_data(**kwargs)
         return context
 
-class ChatListView(generic.View):
+class CreateChatView(generic.View):
   
-    def get(self, **kwargs):
-       
-        
-        return context
+    def post(self, request, **kwargs):
+        print('test')
+        new_chat_name = request.POST['chat_name']
+        print(request.POST['chat_name'])
+        new_chat = Chat.objects.create(name=new_chat_name)
+        print("finish")
+        return redirect('all_chats')

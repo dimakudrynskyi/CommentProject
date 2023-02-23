@@ -14,8 +14,32 @@
         <p>There are no chat in the database.</p>
     {% endif %}
 
-    <a href="#">Create new chat</a>
+    <div class="create_new_chat">
+        {% csrf_token %}
+        <input id="chat_name" name="chat_name" placeholder="Enter chat name" required>
+        <button type="submit" class="btn btn-primary pl-5 pr-5 btnSave" onclick="sortCommentsByText('{{csrf_token}}')">Create</button>
+    </div>
 
     
 </div>
 {% endblock content %}
+{% block scripts %}
+<script>
+    function sortCommentsByText(csrf_token){
+        var el = document.getElementById("chat_name");
+        var chat_name = el.value;
+        
+        $.ajax({
+            url: 'chat/create',
+            type: "POST",
+            data : {
+                'csrfmiddlewaretoken' : csrf_token,
+                'chat_name' : chat_name,
+            },
+            success: function(){
+                location.reload()
+            },
+        });
+    }
+</script>
+{% endblock scripts %}
